@@ -5,4 +5,3 @@ assert.equal(health.status,200);assert.equal((await health.json()).database,'pos
 const page=await fetch(base);assert.equal(page.status,200);const html=await page.text();assert.ok(html.includes('lang="ru"'));assert.ok(html.includes('data-theme="light"'));
 const workspace=await fetch(`${base}/api/workspace?role=DIRECTOR`);assert.equal(workspace.status,401);
 console.log('Anonymous workspace access rejected. Run npm run test:auth for authenticated HTTP coverage.');
-
