@@ -22,6 +22,7 @@
     "test": "tsx --test tests/unit/*.test.ts",
     "test:smoke": "node scripts/smoke-http.mjs",
     "test:auth": "node scripts/auth-smoke.mjs",
+    "test:company": "node scripts/company-smoke.mjs",
     "test:integration": "node --env-file=.env --import tsx --test --test-concurrency=1 tests/integration/*.test.ts"
   },
   "dependencies": {

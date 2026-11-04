@@ -234,7 +234,14 @@ PostgreSQL is unavailable. Check the connection and migrations.|PostgreSQL не�
 Apply database migrations before using the application.|Перед работой примените миграции базы данных.|Жұмысты бастамас бұрын база миграцияларын қолданыңыз.
 Demo access is disabled. Authentication will be implemented in stage 2.|Демо-доступ отключён. Авторизация будет добавлена на втором этапе.|Демо кіру өшірілген. Авторизация екінші кезеңде қосылады.
 Data changed concurrently. Reload and retry.|Данные изменились. Обновите страницу и повторите.|Деректер өзгерді. Бетті жаңартып, қайталаңыз.
-Invalid server response.|Некорректный ответ сервера.|Сервер жауабы қате.`;
+Invalid server response.|Некорректный ответ сервера.|Сервер жауабы қате.
+Director access required.|Доступ разрешён только директору.|Тек директорға қолжетімді.
+You cannot change your own role.|Нельзя изменить собственную роль.|Өз рөліңізді өзгертуге болмайды.
+This email is already a company member.|Сотрудник с этой почтой уже состоит в компании.|Бұл поштадағы қызметкер компанияға тіркелген.
+Invitation is invalid or expired.|Приглашение недействительно или срок истёк.|Шақыру жарамсыз немесе мерзімі өткен.
+Authentication required.|Войдите в аккаунт для продолжения.|Жалғастыру үшін аккаунтқа кіріңіз.
+Invalid credentials.|Неверная почта, БИН или пароль.|Пошта, БСН немесе құпиясөз қате.
+Too many attempts. Retry in 15 minutes.|Слишком много попыток. Повторите через 15 минут.|Әрекет тым көп. 15 минуттан кейін қайталаңыз.`;
 export const dictionary: Record<string, [string, string]> = Object.fromEntries(rows.split('\n').map(row => {const [key,ru,kk]=row.split('|');return [key,[ru,kk]];}));
 export function translate(text:string,language:Language):string {return language==='en'?text:(dictionary[text]?.[language==='ru'?0:1]??text);}
 export function reportText(report:{text:string;date?:string;weather?:string;labor?:string;notes?:string;author?:string},language:Language):string {

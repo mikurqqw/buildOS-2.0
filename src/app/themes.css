@@ -1,4 +1,5 @@
 /* Shared theme tokens cover dashboards, authentication and dialogs. */
+.company-management{max-width:920px;margin:auto;padding:24px;display:grid;gap:24px}.company-management a{color:var(--accent)}.company-management input,.company-management select,.company-management button{min-height:44px}.company-management .user-row{justify-content:space-between;flex-wrap:wrap;overflow-wrap:anywhere}.company-management input[readonly]{width:100%;margin-top:16px}
 :root,[data-theme='light']{color-scheme:light;--bg:#f5f6f8;--surface:#fff;--line:#dde1e7;--muted:#667085;--orange:#ea580c;--text:#17202e;--panel:#fff;--input:#f8fafc;--subtle:#f0f3f6;--accent:#c2410c;--risk:#9a3412}
 [data-theme='dark']{color-scheme:dark;--bg:#09090b;--surface:#18181b;--line:#303036;--muted:#a1a1aa;--orange:#f97316;--text:#fafafa;--panel:#111113;--input:#121215;--subtle:#27272a;--accent:#fb923c;--risk:#fdba74}
 body{background:var(--bg);color:var(--text)}
