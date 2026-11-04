@@ -1,0 +1,2 @@
+import type { Role } from '@/modules/shared/types';
+export const can = (role:Role,action:string) => ({tender:['DIRECTOR','PROJECT_MANAGER','PTO'],project:['DIRECTOR','PROJECT_MANAGER'],issue:['DIRECTOR','PROJECT_MANAGER','FOREMAN','PTO'],task:['DIRECTOR','PROJECT_MANAGER','FOREMAN','PTO'],report:['DIRECTOR','PROJECT_MANAGER','FOREMAN'],purchase:['DIRECTOR','PROJECT_MANAGER','PROCUREMENT'],invite:['DIRECTOR'],document:['DIRECTOR','PROJECT_MANAGER','PTO']}[action]?.includes(role) ?? false);

@@ -1,0 +1,310 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  DIRECTOR
+  PROJECT_MANAGER
+  FOREMAN
+  PTO
+  PROCUREMENT
+  ACCOUNTANT
+}
+
+enum TenderStatus {
+  NEW
+  ANALYSIS
+  DECISION
+  PREPARATION
+  SUBMITTED
+  WON
+  LOST
+}
+
+enum ProjectStatus {
+  PLANNING
+  ACTIVE
+  ON_HOLD
+  COMPLETED
+  CANCELLED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum IssueStatus {
+  OPEN
+  ASSIGNED
+  IN_PROGRESS
+  READY_FOR_REVIEW
+  RESOLVED
+  CLOSED
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
+enum Severity {
+  CRITICAL
+  WARNING
+  INFO
+}
+
+model Company {
+  id          String       @id @default(uuid())
+  name        String
+  bin         String       @unique
+  address     String?
+  users       User[]
+  tenders     Tender[]
+  projects    Project[]
+  invitations Invitation[]
+  createdAt   DateTime     @default(now())
+}
+
+model User {
+  id           String   @id @default(uuid())
+  companyId    String
+  company      Company  @relation(fields: [companyId], references: [id])
+  email        String
+  name         String
+  role         Role
+  passwordHash String?
+  sessions Session[]
+  tasks        Task[]   @relation("AssignedTasks")
+  issues       Issue[]  @relation("AssignedIssues")
+  createdAt    DateTime @default(now())
+
+  @@unique([companyId, email])
+  @@unique([id, companyId])
+}
+
+model Invitation {
+  id         String    @id @default(uuid())
+  companyId  String
+  company    Company   @relation(fields: [companyId], references: [id])
+  email      String
+  name       String
+  role       Role
+  tokenHash  String    @unique
+  expiresAt  DateTime
+  acceptedAt DateTime?
+
+  @@unique([companyId, email])
+}
+
+model Tender {
+  id              String       @id @default(uuid())
+  companyId       String
+  company         Company      @relation(fields: [companyId], references: [id])
+  title           String
+  clientName      String
+  estimatedBudget Decimal      @db.Decimal(18, 2)
+  status          TenderStatus @default(NEW)
+  aiTenderScore   Int?
+  aiMarginPercent Decimal?     @db.Decimal(5, 2)
+  aiRiskSummary   Json?
+  documentName    String?
+  project         Project?
+  createdAt       DateTime     @default(now())
+
+  @@unique([id, companyId])
+  @@index([companyId, status])
+}
+
+model Project {
+  id        String            @id @default(uuid())
+  companyId String
+  company   Company           @relation(fields: [companyId], references: [id])
+  tenderId  String?           @unique
+  tender    Tender?           @relation(fields: [tenderId, companyId], references: [id, companyId])
+  name      String
+  budget    Decimal           @db.Decimal(18, 2)
+  status    ProjectStatus     @default(PLANNING)
+  progress  Int               @default(0)
+  startDate DateTime
+  endDate   DateTime
+  buildings Building[]
+  tasks     Task[]
+  issues    Issue[]
+  aiRisks   AiRiskAlert[]
+  documents Document[]
+  reports   DailyReport[]
+  requests  PurchaseRequest[]
+  createdAt DateTime          @default(now())
+
+  @@unique([tenderId, companyId])
+  @@unique([id, companyId])
+  @@index([companyId, status])
+}
+
+model Building {
+  id        String  @id @default(uuid())
+  projectId String
+  companyId String
+  project   Project @relation(fields: [projectId, companyId], references: [id, companyId])
+  name      String
+  floors    Floor[]
+
+  @@unique([id, projectId, companyId])
+  @@index([companyId, projectId])
+}
+
+model Floor {
+  id         String   @id @default(uuid())
+  buildingId String
+  projectId  String
+  companyId  String
+  building   Building @relation(fields: [buildingId, projectId, companyId], references: [id, projectId, companyId])
+  level      Int
+  zones      Zone[]
+  tasks      Task[]
+  issues     Issue[]
+
+  @@unique([id, projectId, companyId])
+  @@index([companyId, projectId])
+}
+
+model Zone {
+  id        String @id @default(uuid())
+  floorId   String
+  projectId String
+  companyId String
+  floor     Floor  @relation(fields: [floorId, projectId, companyId], references: [id, projectId, companyId])
+  name      String
+
+  @@index([companyId, projectId])
+}
+
+model Task {
+  id          String     @id @default(uuid())
+  projectId   String
+  companyId   String
+  project     Project    @relation(fields: [projectId, companyId], references: [id, companyId])
+  floorId     String?
+  floor       Floor?     @relation(fields: [floorId, projectId, companyId], references: [id, projectId, companyId])
+  issueId     String?
+  issue       Issue?     @relation(fields: [issueId, projectId, companyId], references: [id, projectId, companyId])
+  title       String
+  description String?
+  assigneeId  String?
+  assignee    User?      @relation("AssignedTasks", fields: [assigneeId, companyId], references: [id, companyId])
+  priority    Priority   @default(MEDIUM)
+  dueDate     DateTime
+  status      TaskStatus @default(TODO)
+  createdAt   DateTime   @default(now())
+
+  @@index([companyId, projectId, status])
+}
+
+model Issue {
+  id          String      @id @default(uuid())
+  projectId   String
+  companyId   String
+  project     Project     @relation(fields: [projectId, companyId], references: [id, companyId])
+  floorId     String?
+  floor       Floor?      @relation(fields: [floorId, projectId, companyId], references: [id, projectId, companyId])
+  title       String
+  description String
+  category    String?
+  imageUrl    String?
+  priority    Priority    @default(HIGH)
+  status      IssueStatus @default(OPEN)
+  assigneeId  String?
+  assignee    User?       @relation("AssignedIssues", fields: [assigneeId, companyId], references: [id, companyId])
+  tasks       Task[]
+  createdAt   DateTime    @default(now())
+
+  @@unique([id, projectId, companyId])
+  @@index([companyId, projectId, status])
+}
+
+model AiRiskAlert {
+  id         String            @id @default(uuid())
+  projectId  String
+  companyId  String
+  project    Project           @relation(fields: [projectId, companyId], references: [id, companyId])
+  severity   Severity
+  title      String
+  reason     String
+  impact     String
+  suggestion String
+  isActioned Boolean           @default(false)
+  requests   PurchaseRequest[]
+  createdAt  DateTime          @default(now())
+
+  @@unique([id, projectId, companyId])
+  @@index([companyId, projectId])
+}
+
+model Document {
+  id         String   @id @default(uuid())
+  projectId  String
+  companyId  String
+  project    Project  @relation(fields: [projectId, companyId], references: [id, companyId])
+  name       String
+  storageKey String
+  version    Int      @default(1)
+  createdAt  DateTime @default(now())
+
+  @@unique([projectId, name, version])
+  @@index([companyId, projectId])
+}
+
+model DailyReport {
+  id            String   @id @default(uuid())
+  projectId     String
+  companyId     String
+  project       Project  @relation(fields: [projectId, companyId], references: [id, companyId])
+  date          DateTime
+  weather       String
+  laborCount    Int
+  delayNotes    String?
+  generatedText String
+  authorRole    Role
+  createdAt     DateTime @default(now())
+
+  @@index([companyId, projectId, date])
+}
+
+model PurchaseRequest {
+  id         String       @id @default(uuid())
+  projectId  String
+  companyId  String
+  project    Project      @relation(fields: [projectId, companyId], references: [id, companyId])
+  title      String
+  riskId     String?      @unique
+  risk       AiRiskAlert? @relation(fields: [riskId, projectId, companyId], references: [id, projectId, companyId])
+  status     String       @default("PENDING_APPROVAL")
+  approvedBy String?
+  approvedAt DateTime?
+  createdAt  DateTime     @default(now())
+
+  @@index([companyId, projectId, status])
+}
+
+model Session {
+ id String @id @default(uuid())
+ tokenHash String @unique
+ userId String
+ user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+ expiresAt DateTime
+ @@index([expiresAt])
+}
+model LoginAttempt {
+ key String @id
+ count Int @default(0)
+ windowStart DateTime @default(now())
+}
