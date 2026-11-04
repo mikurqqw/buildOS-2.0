@@ -82,6 +82,7 @@ model User {
   name         String
   role         Role
   passwordHash String?
+  memberships ProjectMember[]
   sessions Session[]
   tasks        Task[]   @relation("AssignedTasks")
   issues       Issue[]  @relation("AssignedIssues")
@@ -137,11 +138,13 @@ model Project {
   progress  Int               @default(0)
   startDate DateTime
   endDate   DateTime
+  members ProjectMember[]
   buildings Building[]
   tasks     Task[]
   issues    Issue[]
   aiRisks   AiRiskAlert[]
   documents Document[]
+  cashFlows CashFlow[]
   reports   DailyReport[]
   requests  PurchaseRequest[]
   createdAt DateTime          @default(now())
@@ -219,6 +222,8 @@ model Issue {
   floor       Floor?      @relation(fields: [floorId, projectId, companyId], references: [id, projectId, companyId])
   title       String
   description String
+  reporterId String?
+  history IssueHistory[]
   category    String?
   imageUrl    String?
   priority    Priority    @default(HIGH)
@@ -273,6 +278,7 @@ model DailyReport {
   weather       String
   laborCount    Int
   delayNotes    String?
+  clientId String? @unique
   generatedText String
   authorRole    Role
   createdAt     DateTime @default(now())
@@ -289,6 +295,9 @@ model PurchaseRequest {
   riskId     String?      @unique
   risk       AiRiskAlert? @relation(fields: [riskId, projectId, companyId], references: [id, projectId, companyId])
   status     String       @default("PENDING_APPROVAL")
+  events Json @default("[]")
+  requestedById String?
+  decisionNote String?
   approvedBy String?
   approvedAt DateTime?
   createdAt  DateTime     @default(now())
@@ -308,4 +317,42 @@ model LoginAttempt {
  key String @id
  count Int @default(0)
  windowStart DateTime @default(now())
+}
+
+model ProjectMember {
+ id String @id @default(uuid())
+ companyId String
+ projectId String
+ userId String
+ project Project @relation(fields:[projectId,companyId],references:[id,companyId],onDelete:Cascade)
+ user User @relation(fields:[userId,companyId],references:[id,companyId],onDelete:Cascade)
+ @@unique([projectId,userId])
+ @@index([companyId,userId])
+}
+
+model IssueHistory {
+ id String @id @default(uuid())
+ issueId String
+ companyId String
+ projectId String
+ issue Issue @relation(fields:[issueId,projectId,companyId],references:[id,projectId,companyId],onDelete:Cascade)
+ actorId String?
+ fromStatus IssueStatus
+ toStatus IssueStatus
+ note String?
+ createdAt DateTime @default(now())
+ @@index([companyId,projectId,issueId])
+}
+
+model CashFlow {
+ id String @id @default(uuid())
+ companyId String
+ projectId String
+ project Project @relation(fields:[projectId,companyId],references:[id,companyId])
+ direction String
+ amount Decimal @db.Decimal(18,2)
+ date DateTime
+ note String
+ createdAt DateTime @default(now())
+ @@index([companyId,projectId,date])
 }

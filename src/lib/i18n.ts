@@ -220,7 +220,25 @@ Theme|Тема|Тақырып
 Light theme|Светлая тема|Ашық тақырып
 Dark theme|Тёмная тема|Қараңғы тақырып
 Language|Язык|Тіл
+Invalid tender status transition.|Недопустимый переход этапа тендера.|Тендер кезеңін ауыстыруға болмайды.
+Invalid issue status transition.|Недопустимый переход статуса замечания.|Ескерту мәртебесін ауыстыруға болмайды.
+A manager or engineer must review this correction.|Исправление должен проверить руководитель или инженер.|Түзетуді басшы немесе инженер тексеруі тиіс.
+Another employee must verify the correction.|Исправление должен подтвердить другой сотрудник.|Түзетуді басқа қызметкер растауы тиіс.
+Maximum file size is 10 MB.|Максимальный размер файла — 10 МБ.|Файл өлшемі 10 МБ-тан аспауы тиіс.
+File contents do not match its extension.|Содержимое файла не соответствует расширению.|Файл мазмұны кеңейтіміне сәйкес емес.
+End date must not precede start date.|Дата завершения не может быть раньше начала.|Аяқталу күні басталу күнінен ерте болмауы тиіс.
+This structure item already exists.|Такой элемент структуры уже существует.|Мұндай құрылым элементі бар.
+Won tender is locked.|Выигранный тендер нельзя редактировать.|Жеңіп алынған тендерді өзгертуге болмайды.
 Home|Главная|Басты бет
+Materials|Материалы и закупки|Материалдар және сатып алу
+APPROVED|Согласовано|Мақұлданды
+REJECTED|Отклонено|Қабылданбады
+ORDERED|Заказано|Тапсырыс берілді
+DELIVERED|Доставлено|Жеткізілді
+ACTIVE|Активен|Белсенді
+ON_HOLD|Приостановлен|Тоқтатылды
+COMPLETED|Завершён|Аяқталды
+CANCELLED|Отменён|Бас тартылды
 LOW|Низкий|Төмен
 MEDIUM|Средний|Орташа
 Clear|Ясно|Ашық
@@ -228,6 +246,10 @@ OPEN|Открыто|Ашық
 READY_FOR_REVIEW|На проверке|Тексеруде
 RESOLVED|Исправлено|Түзетілді
 CLOSED|Закрыто|Жабық
+DECISION|Принятие решения|Шешім қабылдау
+PREPARATION|Подготовка|Дайындау
+SUBMITTED|Подан|Берілді
+LOST|Проигран|Жеңілдік
 Saved to PostgreSQL.|Сохранено в PostgreSQL.|PostgreSQL базасында сақталды.
 Demo access only. Data is saved to PostgreSQL. Authentication is stage 2.|Демо-доступ. Данные сохраняются в PostgreSQL. Авторизация — на втором этапе.|Демо кіру. Деректер PostgreSQL базасында сақталады. Авторизация — екінші кезеңде.
 Demo workspace · PostgreSQL persistence · Mock AI|Демо · Данные в PostgreSQL · Имитация ИИ|Демо · Деректер PostgreSQL базасында · ЖИ имитациясы

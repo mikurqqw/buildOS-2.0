@@ -8,6 +8,7 @@ import { tokenHash } from './session';
 
 const text=z.string().trim().min(2).max(200);
 export const managementSchema=z.discriminatedUnion('action',[
+ z.object({action:z.literal('membership'),userId:z.string().uuid(),projectId:z.string().uuid(),enabled:z.enum(['true','false'])}).strict(),
  z.object({action:z.literal('company'),name:text,address:z.string().trim().max(500)}).strict(),
  z.object({action:z.literal('role'),userId:z.string().uuid(),role:z.enum(roles)}).strict(),
  z.object({action:z.literal('invite'),name:text,email:z.string().trim().email().max(254).transform(v=>v.toLowerCase()),role:z.enum(roles)}).strict(),
@@ -19,6 +20,12 @@ export async function manage(actor:Actor,input:z.infer<typeof managementSchema>)
  if(actor.role!=='DIRECTOR')throw new AppError(403,'FORBIDDEN','Director access required.');
  return db().$transaction(async tx=>{
   const companyId=actor.companyId;
+  if(input.action==='membership'){
+   if(!await tx.project.findFirst({where:{id:input.projectId,companyId}})||!await tx.user.findFirst({where:{id:input.userId,companyId}}))notFound('Project member');
+   if(input.enabled==='true')await tx.projectMember.upsert({where:{projectId_userId:{projectId:input.projectId,userId:input.userId}},create:{companyId,projectId:input.projectId,userId:input.userId},update:{}});
+   else await tx.projectMember.deleteMany({where:{companyId,projectId:input.projectId,userId:input.userId}});
+   return {ok:true};
+  }
   // Serialize director changes so concurrent demotions cannot leave a company without a director.
   await tx.$queryRaw`SELECT "id" FROM "Company" WHERE "id" = ${companyId} FOR UPDATE`;
   if(input.action==='company')return tx.company.update({where:{id:companyId},data:{name:input.name,address:input.address}});

@@ -14,7 +14,8 @@ export async function tenderCommand(tx: Prisma.TransactionClient, ctx: TenantCon
     if(tender.status==='WON')throw new AppError(409,'INVALID_TRANSITION','A won tender cannot be reanalyzed.');
     return tx.tender.update({where,data:{status:'ANALYSIS',aiTenderScore:tenderAnalysis.score,aiMarginPercent:tenderAnalysis.margin,aiRiskSummary:tenderAnalysis.risks}});
   }
-  if(tender.aiTenderScore===null)throw new AppError(409,'INVALID_TRANSITION','Analyze tender first');
+  if(!['ANALYSIS','SUBMITTED','WON'].includes(tender.status))throw new AppError(409,'INVALID_TRANSITION','Tender is not ready for conversion.');
+  if(tender.status==='ANALYSIS'&&tender.aiTenderScore===null)throw new AppError(409,'INVALID_TRANSITION','Analyze tender first');
   // Lock this tender with an UPDATE before checking the project to serialize concurrent conversion.
   await tx.tender.update({where,data:{status:'WON'}});
   const existing = await tx.project.findUnique({where:{tenderId_companyId:{tenderId:tender.id,companyId}}});
@@ -22,5 +23,6 @@ export async function tenderCommand(tx: Prisma.TransactionClient, ctx: TenantCon
   const startDate=new Date(); const endDate=new Date(startDate);endDate.setUTCMonth(endDate.getUTCMonth()+tender.durationMonths);
   const dueDate=new Date(startDate);dueDate.setUTCDate(dueDate.getUTCDate()-1);
   const project=await tx.project.create({data:{companyId,tenderId:tender.id,name:tender.title,budget:tender.estimatedBudget,startDate,endDate}});
+  if(ctx.userId)await tx.projectMember.create({data:{companyId,projectId:project.id,userId:ctx.userId}});
   return project;
 }

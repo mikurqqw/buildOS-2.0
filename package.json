@@ -25,7 +25,8 @@
     "test:company": "node scripts/company-smoke.mjs",
     "test:workspace": "node scripts/workspace-smoke.mjs",
     "test:e2e": "playwright test",
-    "test:integration": "node --env-file=.env --import tsx --test --test-concurrency=1 tests/integration/*.test.ts"
+    "test:integration": "node --env-file=.env --import tsx --test --test-concurrency=1 tests/integration/*.test.ts",
+    "test:documents": "node scripts/document-smoke.mjs"
   },
   "dependencies": {
     "@prisma/client": "^6.16.0",

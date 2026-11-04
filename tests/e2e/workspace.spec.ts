@@ -26,12 +26,12 @@ test('friendly workspace: forms, chat and responsive screens',async({page,contex
  await page.locator('nav').getByRole('button',{name:'Задачи',exact:true}).click();await page.getByRole('button',{name:'Новая задача',exact:true}).click();
  await page.locator('input[name=title]').fill('Проверить окна');await page.locator('input[name=dueDate]').fill('2026-11-20');
  await page.getByRole('button',{name:'Создать задачу',exact:true}).click();await expect(page.getByRole('heading',{name:'Проверить окна',exact:true})).toBeVisible();
- await page.locator('nav').getByRole('button',{name:'Ежедневные отчёты',exact:true}).click();await page.locator('input[name=temperature]').fill('-12.5');
+ await page.locator('nav').getByRole('button',{name:'Ежедневные отчёты',exact:true}).click();await page.locator('input[name=temperature]').fill('-12.5');await page.locator('input[name=labor]').fill('24');
  await page.getByRole('button',{name:'Сформировать и сохранить',exact:true}).click();await expect(page.locator('.report').last()).toContainText('-12.5°C');
  await page.locator('nav').getByRole('button',{name:'Центр управления ИИ',exact:true}).click();
  await page.locator('.chat-composer textarea').fill('Какие риски есть на проекте?');await page.locator('.chat-composer textarea').press('Enter');
  await expect(page.locator('.chat-message.assistant')).toBeVisible();
- const pages=['Главная','Проекты','Задачи','Ежедневные отчёты','Центр управления ИИ','Команда и компания','Работы на объекте'];
+ const pages=['Главная','Проекты','Задачи','Ежедневные отчёты','Центр управления ИИ','Команда и компания','Работы на объекте','Обзор','Тендеры','Материалы и закупки'];
  for(const width of [375,768,1280,1920]){
   await page.setViewportSize({width,height:1000});
   for(const theme of ['light','dark']){

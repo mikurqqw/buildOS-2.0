@@ -2,6 +2,7 @@ import type {Language} from '@/lib/i18n';
 export const copy=(language:Language,ru:string,kk:string,en:string)=>({ru,kk,en}[language]);
 export function description(page:string,l:Language){
  const descriptions:Record<string,[string,string,string]>={
+ Materials:['Запрашивайте материалы, согласовывайте закупки и отмечайте поставки.','Материал сұрап, сатып алуды мақұлдап, жеткізілімді белгілеңіз.','Request materials, approve purchases and track delivery.'],
  Home:['Выберите, с чего начать работу.','Жұмысты неден бастау керегін таңдаңыз.','Choose where to start.'],
  Overview:['Главные показатели и то, что требует внимания.','Негізгі көрсеткіштер мен маңызды мәселелер.','Key numbers and what needs attention.'],
  Tenders:['Собирайте заявки и оценивайте новые возможности.','Тендерлерді жинап, мүмкіндіктерді бағалаңыз.','Manage bids and evaluate opportunities.'],

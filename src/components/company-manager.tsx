@@ -1,11 +1,12 @@
 'use client';
+import {ProjectAccess} from './project-access';
 import {useEffect,useState} from 'react';
 import {apiRequest} from '@/modules/workspace/client';
 import {roles,type Role} from '@/modules/shared/types';
 import {EnumOptions} from './enum-options';
 import {type Language,translate} from '@/lib/i18n';
 type Member={id:string;name:string;email:string;role:Role};
-type Data={company:{name:string;bin:string;address:string|null};users:Member[];invitations:(Member&{expiresAt:string})[];viewerId:string};
+type Data={company:{name:string;bin:string;address:string|null};users:Member[];invitations:(Member&{expiresAt:string})[];projects:{id:string;name:string;members:{userId:string}[]}[];viewerId:string};
 const labels={ru:['Компания и сотрудники','Название компании','Адрес','Сохранить','Пригласить по ссылке','Имя','Почта','Создать ссылку','Приглашения','Отозвать','Ссылка доступна один раз. Передайте её сотруднику лично.','Назад в BuildOS','Сохранено','БИН','Загрузка…'],kk:['Компания және қызметкерлер','Компания атауы','Мекенжай','Сақтау','Сілтеме арқылы шақыру','Аты','Пошта','Сілтеме құру','Шақырулар','Кері қайтару','Сілтеме бір рет көрсетіледі. Қызметкерге жеке жіберіңіз.','BuildOS жүйесіне оралу','Сақталды','БСН','Жүктелуде…'],en:['Company and people','Company name','Address','Save','Invite by link','Name','Email','Create link','Invitations','Revoke','This link is shown once. Share it privately with the employee.','Back to BuildOS','Saved','BIN','Loading…']};
 export function CompanyManager(){
  const [language,setLanguage]=useState<Language>('ru'),[data,setData]=useState<Data>(),[error,setError]=useState(''),[busy,setBusy]=useState(false),[link,setLink]=useState('');
@@ -22,6 +23,6 @@ export function CompanyManager(){
  <section className="card form-card"><h2>{l[0]}</h2>{data.users.map(user=><div className="user-row" key={user.id}><div><h3>{user.name}</h3><p className="muted">{user.email}</p></div><select aria-label={`${translate('Role',language)}: ${user.name}`} disabled={busy||user.id===data.viewerId} value={user.role} onChange={e=>submit({action:'role',userId:user.id,role:e.target.value})}><EnumOptions values={roles} language={language}/></select></div>)}</section>
  <form className="card form-card" onSubmit={e=>{e.preventDefault();setLink('');submit({action:'invite',...Object.fromEntries(new FormData(e.currentTarget))})}}><h2>{l[4]}</h2><label>{l[5]}<input name="name" required minLength={2} maxLength={200}/></label><label>{l[6]}<input name="email" type="email" required maxLength={254}/></label><label>{translate('Role',language)}<select name="role"><EnumOptions values={roles} language={language}/></select></label><button className="primary" disabled={busy}>{l[7]}</button></form>
  {link&&<div className="card form-card"><p>{l[10]}</p><input aria-label={l[7]} readOnly value={link} onFocus={e=>e.target.select()}/></div>}
- <section className="card form-card"><h2>{l[8]}</h2>{!data.invitations.length&&<p className="muted">—</p>}{data.invitations.map(invite=><div className="user-row" key={invite.id}><div><h3>{invite.name}</h3><p>{invite.email} · {translate(invite.role,language)}</p><small>{new Date(invite.expiresAt).toLocaleDateString(language==='kk'?'kk-KZ':language)}</small></div><button className="primary" disabled={busy} onClick={()=>submit({action:'revoke',id:invite.id})}>{l[9]}</button></div>)}</section></>}
+ <ProjectAccess projects={data.projects} users={data.users} language={language} busy={busy} onChange={submit}/><section className="card form-card"><h2>{l[8]}</h2>{!data.invitations.length&&<p className="muted">—</p>}{data.invitations.map(invite=><div className="user-row" key={invite.id}><div><h3>{invite.name}</h3><p>{invite.email} · {translate(invite.role,language)}</p><small>{new Date(invite.expiresAt).toLocaleDateString(language==='kk'?'kk-KZ':language)}</small></div><button className="primary" disabled={busy} onClick={()=>submit({action:'revoke',id:invite.id})}>{l[9]}</button></div>)}</section></>}
  </main>;
 }

@@ -13,6 +13,16 @@ const reused=await post('/api/invitations/accept',{token,password});assert.equal
 const forbidden=await post('/api/company',{action:'company',name:'Hijacked',address:''},workerCookie);assert.equal(forbidden.status,403);
 const workerWorkspace=await fetch(base+'/api/workspace',{headers:{Cookie:workerCookie}});const workerData=await workerWorkspace.json();assert.equal(workerData.company.id,(await owner.json()).user.companyId);
 const worker=workerData.state.users.find(u=>u.email===`worker-${bin}@example.test`);
+async function workspaceCommand(action,payload){const response=await post('/api/workspace/commands',{role:'DIRECTOR',action,payload},cookie);assert.equal(response.status,200);return (await response.json()).state}
+let state=await workspaceCommand('newTender',{title:'Access test project',client:'Access client'});
+const tenderId=state.tenders[0].id;await workspaceCommand('analyze',{id:tenderId});state=await workspaceCommand('convert',{id:tenderId});const projectId=state.projects[0].id;
+async function employeeWorkspace(){return (await (await fetch(base+'/api/workspace',{headers:{Cookie:workerCookie}})).json()).state}
+assert.equal((await employeeWorkspace()).projects.length,0);
+assert.equal((await post('/api/company',{action:'membership',userId:worker.id,projectId,enabled:'true'},cookie)).status,200);
+let assigned=await employeeWorkspace();assert.equal(assigned.projects.length,1);assert.equal(assigned.projects[0].budget,0);assert.equal(assigned.tenders.length,0);
+assert.equal((await post('/api/company',{action:'membership',userId:worker.id,projectId,enabled:'false'},cookie)).status,200);
+assert.equal((await employeeWorkspace()).projects.length,0);
+const deniedWrite=await post('/api/workspace/commands',{action:'issue',role:'DIRECTOR',payload:{projectId,title:'Denied issue',description:'No membership'}},workerCookie);assert.equal(deniedWrite.status,404);
 const change=await post('/api/company',{action:'role',userId:worker.id,role:'PTO'},cookie);assert.equal(change.status,200);
 const revokedSession=await fetch(base+'/api/workspace',{headers:{Cookie:workerCookie}});assert.equal(revokedSession.status,401);
 const selfChange=await post('/api/company',{action:'role',userId:snapshot.viewerId,role:'FOREMAN'},cookie);assert.equal(selfChange.status,409);

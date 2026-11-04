@@ -1,0 +1,10 @@
+'use client';
+import {useState} from 'react';
+import type {Project} from '@/modules/shared/types';
+import type {Language} from '@/lib/i18n';
+import {copy} from './copy';
+export function StructureMaintenance({project,language,busy,onSave}:{project:Project;language:Language;busy:boolean;onSave:(a:string,p:Record<string,string>)=>Promise<unknown>}){
+ const [operation,setOperation]=useState('rename');
+ const items=project.buildings.flatMap(b=>[{id:b.id,entity:'building',label:b.name},...b.floors.flatMap(f=>[{id:f.id,entity:'floor',label:`${b.name} / ${f.level}`},...(f.zoneEntries||[]).map(z=>({id:z.id,entity:'zone',label:`${b.name} / ${f.level} / ${z.name}`}))])]);
+ return <details><summary style={{padding:20,cursor:'pointer'}}>{copy(language,'Изменить структуру','Құрылымды өзгерту','Manage structure')}</summary><form className="structure-form" onSubmit={async e=>{e.preventDefault();const p=Object.fromEntries(new FormData(e.currentTarget)) as Record<string,string>;const [entity,id]=p.item.split(':');if(operation==='remove'&&!confirm(copy(language,'Удалить выбранный элемент? Родитель должен быть пустым.','Элементті жою керек пе? Ол бос болуы тиіс.','Remove this item? Parent items must be empty.')))return;await onSave('changeStructure',{entity,id,operation,value:p.value||'unused'})}}><label>{copy(language,'Элемент','Элемент','Item')}<select name="item" required><option value="">—</option>{items.map(i=><option key={i.id} value={`${i.entity}:${i.id}`}>{i.label}</option>)}</select></label><label>{copy(language,'Действие','Әрекет','Action')}<select value={operation} onChange={e=>setOperation(e.target.value)}><option value="rename">{copy(language,'Переименовать / изменить номер','Атауын / нөмірін өзгерту','Rename / change level')}</option><option value="remove">{copy(language,'Удалить пустой элемент','Бос элементті жою','Remove empty item')}</option></select></label>{operation==='rename'&&<label>{copy(language,'Новое значение','Жаңа мән','New value')}<input name="value" required maxLength={200}/></label>}<button className="primary" disabled={busy||!items.length}>{copy(language,'Применить','Қолдану','Apply')}</button></form></details>;
+}

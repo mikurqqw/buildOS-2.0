@@ -1,0 +1,1 @@
+ALTER TABLE "PurchaseRequest" ADD COLUMN "events" JSONB NOT NULL DEFAULT '[]';

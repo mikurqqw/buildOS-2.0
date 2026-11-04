@@ -3,7 +3,7 @@ import { can } from '@/lib/domain';
 import { config } from '@/server/config';
 import { AppError } from '@/server/http/errors';
 
-export type TenantContext = { companyId: string; role: Role };
+export type TenantContext = { companyId: string; userId?:string; role: Role };
 // Stage 1: explicit server-configured demo tenant. Stage 2 replaces this adapter with verified sessions.
 export function demoContext(role: Role): TenantContext {
   const settings = config();

@@ -1,0 +1,1 @@
+export const tenderTransitions={NEW:['ANALYSIS','LOST'],ANALYSIS:['DECISION','LOST'],DECISION:['PREPARATION','LOST'],PREPARATION:['SUBMITTED','LOST'],SUBMITTED:['WON','LOST'],WON:[],LOST:['NEW']} satisfies Record<string,string[]>;
