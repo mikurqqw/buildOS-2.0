@@ -1,6 +1,4 @@
 import {randomUUID} from 'node:crypto';
-import {mkdir,writeFile,unlink} from 'node:fs/promises';
-import {resolve} from 'node:path';
 import {z} from 'zod';
 import {endpoint,AppError} from '@/server/http/errors';
 import {sessionContext,sameOrigin} from '@/modules/company/session';
@@ -24,12 +22,12 @@ export async function POST(request:Request){return endpoint(async()=>{
  const office=zip&&bytes.includes(Buffer.from('[Content_Types].xml'))&&bytes.includes(Buffer.from(ext==='docx'?'word/':'xl/'));
  if(ext==='pdf'?!pdf:!office)throw new AppError(422,'INVALID_SIGNATURE','File contents do not match its extension.');
  await requireProject(db(),ctx,projectId);
- const key=`${randomUUID()}.${ext}`,root=resolve('.data/uploads');await mkdir(root,{recursive:true});const path=resolve(root,key);await writeFile(path,bytes,{flag:'wx'});
- try{await db().$transaction(async tx=>{
+ const key=`${randomUUID()}.${ext}`;
+ await db().$transaction(async tx=>{
   await requireProject(tx,ctx,projectId);
   await tx.$queryRaw`SELECT "id" FROM "Project" WHERE "id"=${projectId} AND "companyId"=${ctx.companyId} FOR UPDATE`;
   const prior=await tx.document.aggregate({where:{projectId,companyId:ctx.companyId,name},_max:{version:true}});
-  await tx.document.create({data:{projectId,companyId:ctx.companyId,name,version:(prior._max.version||0)+1,storageKey:key}});
- })}catch(error){await unlink(path);throw error}
+  await tx.document.create({data:{projectId,companyId:ctx.companyId,name,version:(prior._max.version||0)+1,storageKey:key,content:bytes}});
+ });
  return readWorkspace(ctx);
 });}

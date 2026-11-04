@@ -16,7 +16,7 @@ export async function readWorkspace(ctx:TenantContext):Promise<{state:State;comp
    tx.project.findMany({where:projectFilter(ctx),orderBy,include:{buildings:{orderBy:{name:'asc'},include:{floors:{orderBy:{level:'asc'},include:{zones:{orderBy:{name:'asc'}}}}}}}}),
    tx.task.findMany({where:scoped,orderBy,include:{assignee:true}}),tx.issue.findMany({where:scoped,orderBy,include:{assignee:true,history:{orderBy:{createdAt:'asc'}}}}),
    tx.aiRiskAlert.findMany({where:scoped,orderBy}),tx.dailyReport.findMany({where:scoped,orderBy}),tx.purchaseRequest.findMany({where:scoped,orderBy}),
-   tx.document.findMany({where:{...scoped,...(ctx.role==='ACCOUNTANT'?{id:'no-access'}:{})},orderBy}),tx.user.findMany({where,orderBy,select:{id:true,name:true,email:true,role:true}}),
+   tx.document.findMany({select:{id:true,projectId:true,name:true,version:true,storageKey:true},where:{...scoped,...(ctx.role==='ACCOUNTANT'?{id:'no-access'}:{})},orderBy}),tx.user.findMany({where,orderBy,select:{id:true,name:true,email:true,role:true}}),
    tx.invitation.findMany({where:{companyId,...(ctx.role!=='DIRECTOR'?{id:'no-access'}:{}),acceptedAt:null,expiresAt:{gt:new Date()}},select:{id:true,name:true,email:true,role:true}}),
   ]);
   const cashFlows=financialAccess(ctx)?await tx.cashFlow.findMany({where:scoped,orderBy:{date:'desc'}}):[];

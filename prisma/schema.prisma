@@ -261,6 +261,7 @@ model Document {
   companyId  String
   project    Project  @relation(fields: [projectId, companyId], references: [id, companyId])
   name       String
+  content Bytes?
   storageKey String
   version    Int      @default(1)
   createdAt  DateTime @default(now())
