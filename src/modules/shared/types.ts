@@ -1,6 +1,6 @@
 export const roles = ['DIRECTOR','PROJECT_MANAGER','FOREMAN','PTO','PROCUREMENT','ACCOUNTANT'] as const;
 export type Role = typeof roles[number];
-export type Tender = {id:string;companyId:string;title:string;clientName:string;budget:number;status:'NEW'|'ANALYSIS'|'DECISION'|'PREPARATION'|'SUBMITTED'|'WON'|'LOST';document?:string;score?:number;margin?:number;risks?:string[]};
+export type Tender = {id:string;companyId:string;title:string;clientName:string;budget:number;durationMonths?:number;status:'NEW'|'ANALYSIS'|'DECISION'|'PREPARATION'|'SUBMITTED'|'WON'|'LOST';document?:string;score?:number;margin?:number;risks?:string[]};
 export type Project = {id:string;companyId:string;tenderId?:string;name:string;budget:number;progress:number;status:string;buildings:{name:string;floors:{level:number;zones:string[]}[]}[]};
 export type Task = {id:string;projectId:string;title:string;assignee:string;priority:string;status:string;dueDate:string};
 export type Issue = {id:string;projectId:string;title:string;description:string;priority:string;status:string;assignee:string;category:string;imageUrl?:string};

@@ -116,6 +116,7 @@ model Tender {
   aiTenderScore   Int?
   aiMarginPercent Decimal?     @db.Decimal(5, 2)
   aiRiskSummary   Json?
+  durationMonths  Int @default(18)
   documentName    String?
   project         Project?
   createdAt       DateTime     @default(now())

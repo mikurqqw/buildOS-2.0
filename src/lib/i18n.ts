@@ -220,6 +220,10 @@ Theme|Тема|Тақырып
 Light theme|Светлая тема|Ашық тақырып
 Dark theme|Тёмная тема|Қараңғы тақырып
 Language|Язык|Тіл
+Home|Главная|Басты бет
+LOW|Низкий|Төмен
+MEDIUM|Средний|Орташа
+Clear|Ясно|Ашық
 Saved to PostgreSQL.|Сохранено в PostgreSQL.|PostgreSQL базасында сақталды.
 Demo access only. Data is saved to PostgreSQL. Authentication is stage 2.|Демо-доступ. Данные сохраняются в PostgreSQL. Авторизация — на втором этапе.|Демо кіру. Деректер PostgreSQL базасында сақталады. Авторизация — екінші кезеңде.
 Demo workspace · PostgreSQL persistence · Mock AI|Демо · Данные в PostgreSQL · Имитация ИИ|Демо · Деректер PostgreSQL базасында · ЖИ имитациясы
@@ -248,5 +252,7 @@ export function reportText(report:{text:string;date?:string;weather?:string;labo
  if(!report.date)return report.text;
  const t=(s:string)=>translate(s,language);
  const notes=report.notes||(language==='ru'?'Задержек нет':language==='kk'?'Кідіріс жоқ':'No delays reported');
- return `${t('Daily site report')} · ${report.date}. ${t('Weather')}: ${t(report.weather||'')}. ${t('Labor count')}: ${report.labor}. ${t('Delay notes')}: ${notes}. ${t('Role')}: ${t(report.author||'')}.`;
+ const [condition,temperature]=(report.weather||'').split(' · ');
+ const weather=t(condition)+(temperature?` · ${temperature}`:'');
+ return `${t('Daily site report')} · ${report.date}. ${t('Weather')}: ${weather}. ${t('Labor count')}: ${report.labor}. ${t('Delay notes')}: ${notes}. ${t('Role')}: ${t(report.author||'')}.`;
 }

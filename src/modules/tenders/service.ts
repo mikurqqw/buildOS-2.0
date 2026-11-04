@@ -6,7 +6,7 @@ import { tenderAnalysis, procurementRisk } from '@/modules/ai/mock';
 
 export async function tenderCommand(tx: Prisma.TransactionClient, ctx: TenantContext, cmd: Extract<Command, {action:'newTender'|'analyze'|'convert'}>) {
   const companyId = ctx.companyId;
-  if(cmd.action==='newTender') return tx.tender.create({data:{companyId,title:cmd.payload.title,clientName:cmd.payload.client,estimatedBudget:'8500000000',documentName:cmd.payload.document||null}});
+  if(cmd.action==='newTender') return tx.tender.create({data:{companyId,title:cmd.payload.title,clientName:cmd.payload.client,estimatedBudget:cmd.payload.budget,durationMonths:Number(cmd.payload.durationMonths),documentName:cmd.payload.document||null}});
   const where = {id_companyId:{id:cmd.payload.id,companyId}};
   const tender = await tx.tender.findUnique({where});
   if(!tender)notFound('Tender');
@@ -19,9 +19,9 @@ export async function tenderCommand(tx: Prisma.TransactionClient, ctx: TenantCon
   await tx.tender.update({where,data:{status:'WON'}});
   const existing = await tx.project.findUnique({where:{tenderId_companyId:{tenderId:tender.id,companyId}}});
   if(existing)return existing;
-  const startDate=new Date(); const endDate=new Date(startDate);endDate.setUTCMonth(endDate.getUTCMonth()+18);
+  const startDate=new Date(); const endDate=new Date(startDate);endDate.setUTCMonth(endDate.getUTCMonth()+tender.durationMonths);
   const dueDate=new Date(startDate);dueDate.setUTCDate(dueDate.getUTCDate()-1);
-  const project=await tx.project.create({data:{companyId,tenderId:tender.id,name:'Alatau Residence',budget:tender.estimatedBudget,startDate,endDate}});
+  const project=await tx.project.create({data:{companyId,tenderId:tender.id,name:tender.title,budget:tender.estimatedBudget,startDate,endDate}});
   const building=await tx.building.create({data:{companyId,projectId:project.id,name:'Block A'}});
   for(const level of [1,2]){
     const floor=await tx.floor.create({data:{companyId,projectId:project.id,buildingId:building.id,level}});
