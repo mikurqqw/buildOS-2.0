@@ -22,12 +22,5 @@ export async function tenderCommand(tx: Prisma.TransactionClient, ctx: TenantCon
   const startDate=new Date(); const endDate=new Date(startDate);endDate.setUTCMonth(endDate.getUTCMonth()+tender.durationMonths);
   const dueDate=new Date(startDate);dueDate.setUTCDate(dueDate.getUTCDate()-1);
   const project=await tx.project.create({data:{companyId,tenderId:tender.id,name:tender.title,budget:tender.estimatedBudget,startDate,endDate}});
-  const building=await tx.building.create({data:{companyId,projectId:project.id,name:'Block A'}});
-  for(const level of [1,2]){
-    const floor=await tx.floor.create({data:{companyId,projectId:project.id,buildingId:building.id,level}});
-    await tx.zone.createMany({data:['East','West'].map(name=>({companyId,projectId:project.id,floorId:floor.id,name}))});
-  }
-  await tx.task.create({data:{companyId,projectId:project.id,title:'Request façade materials for Block A',priority:'HIGH',dueDate}});
-  await tx.aiRiskAlert.create({data:{companyId,projectId:project.id,...procurementRisk}});
   return project;
 }

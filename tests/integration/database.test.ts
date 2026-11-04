@@ -39,7 +39,16 @@ test('PostgreSQL lifecycle, persistence, concurrency and tenant foreign keys',as
  await command('analyze',{id:tenderId});
  await Promise.all([command('convert',{id:tenderId}),command('convert',{id:tenderId})]);
  workspace=await readWorkspace(ctx);assert.equal(workspace.state.projects.length,1);projectId=workspace.state.projects[0].id;
- assert.equal(workspace.state.projects[0].buildings[0].floors.length,2);assert.equal(workspace.state.tenders[0].score,78);
+ assert.equal(workspace.state.projects[0].buildings.length,0);
+ await command('building',{projectId,name:'Custom Block'});
+ const building=await db().building.findFirstOrThrow({where:{companyId,projectId}});
+ await command('floor',{projectId,buildingId:building.id,level:'3'});
+ const floor=await db().floor.findFirstOrThrow({where:{companyId,projectId}});
+ await command('zone',{projectId,floorId:floor.id,name:'My Zone'});
+ workspace=await readWorkspace(ctx);assert.equal(workspace.state.projects[0].buildings[0].floors[0].level,3);
+ assert.equal(workspace.state.projects[0].buildings[0].floors[0].zones[0],'My Zone');
+ await db().aiRiskAlert.create({data:{companyId,projectId,severity:'CRITICAL',title:'Fixture risk',reason:'Test',impact:'Test',suggestion:'Test'}});
+ workspace=await readWorkspace(ctx);assert.equal(workspace.state.tenders[0].score,78);
  await execute({companyId,role:'FOREMAN'},commandSchema.parse({action:'issue',role:'FOREMAN',payload:{projectId,title:'Mesh defect',description:'Inspect spacing'}}));
  await command('report',{projectId,date:'2026-10-10',weather:'Rain',labor:'24',notes:'Review'});
  await Promise.all([command('document',{projectId,name:'drawing.pdf'}),command('document',{projectId,name:'drawing.pdf'})]);

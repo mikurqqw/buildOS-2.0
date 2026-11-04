@@ -224,6 +224,10 @@ Home|Главная|Басты бет
 LOW|Низкий|Төмен
 MEDIUM|Средний|Орташа
 Clear|Ясно|Ашық
+OPEN|Открыто|Ашық
+READY_FOR_REVIEW|На проверке|Тексеруде
+RESOLVED|Исправлено|Түзетілді
+CLOSED|Закрыто|Жабық
 Saved to PostgreSQL.|Сохранено в PostgreSQL.|PostgreSQL базасында сақталды.
 Demo access only. Data is saved to PostgreSQL. Authentication is stage 2.|Демо-доступ. Данные сохраняются в PostgreSQL. Авторизация — на втором этапе.|Демо кіру. Деректер PostgreSQL базасында сақталады. Авторизация — екінші кезеңде.
 Demo workspace · PostgreSQL persistence · Mock AI|Демо · Данные в PostgreSQL · Имитация ИИ|Демо · Деректер PostgreSQL базасында · ЖИ имитациясы

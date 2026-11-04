@@ -4,7 +4,7 @@ import type { Command } from '@/modules/workspace/contracts';
 import { notFound } from '@/server/http/errors';
 import { requireProject } from '@/modules/projects/repository';
 
-export async function fieldCommand(tx: Prisma.TransactionClient,ctx:TenantContext,cmd:Extract<Command,{action:'createTask'|'issue'|'task'|'report'|'document'}>){
+export async function fieldCommand(tx: Prisma.TransactionClient,ctx:TenantContext,cmd:Extract<Command,{action:'issueStatus'|'createTask'|'issue'|'task'|'report'|'document'}>){
   const companyId=ctx.companyId,projectId=cmd.payload.projectId;
   await requireProject(tx,ctx,projectId);
   if(cmd.action==='createTask'){
@@ -12,9 +12,14 @@ export async function fieldCommand(tx: Prisma.TransactionClient,ctx:TenantContex
     return tx.task.create({data:{companyId,projectId,title:cmd.payload.title,description:cmd.payload.description,priority:cmd.payload.priority,dueDate:new Date(cmd.payload.dueDate+'T00:00:00Z'),assigneeId:cmd.payload.assigneeId||null}});
   }
   if(cmd.action==='issue'){
-    const engineer=await tx.user.findFirst({where:{companyId,role:'PTO'},orderBy:{id:'asc'}});
-    const floor=await tx.floor.findFirst({where:{companyId,projectId,level:2},orderBy:{id:'asc'}});
-    return tx.issue.create({data:{companyId,projectId,title:cmd.payload.title,description:cmd.payload.description,imageUrl:cmd.payload.imageUrl||null,category:'Structural / reinforcement',priority:'HIGH',status:engineer?'ASSIGNED':'OPEN',assigneeId:engineer?.id,floorId:floor?.id}});
+    const {floorId,assigneeId}=cmd.payload;
+    if(floorId&&!await tx.floor.findFirst({where:{id:floorId,companyId,projectId}}))notFound('Floor');
+    if(assigneeId&&!await tx.user.findFirst({where:{id:assigneeId,companyId}}))notFound('Assignee');
+    return tx.issue.create({data:{companyId,projectId,title:cmd.payload.title,description:cmd.payload.description,imageUrl:cmd.payload.imageUrl||null,priority:cmd.payload.priority,status:assigneeId?'ASSIGNED':'OPEN',assigneeId:assigneeId||null,floorId:floorId||null}});
+  }
+  if(cmd.action==='issueStatus'){
+    const result=await tx.issue.updateMany({where:{id:cmd.payload.id,companyId,projectId},data:{status:cmd.payload.status}});
+    if(!result.count)notFound('Issue');return;
   }
   if(cmd.action==='task'){
     const result=await tx.task.updateMany({where:{id:cmd.payload.id,companyId,projectId},data:{status:cmd.payload.status}});
